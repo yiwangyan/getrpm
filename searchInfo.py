@@ -5,7 +5,7 @@ from urlparse import urljoin
 try:
 	from pysqlite2 import dbapi2 as sqlite
 except ImportError:
-	import sqlite3
+	import sqlite3 as sqlite
 
 class crawler:
 	def __init__(self, dbname):
