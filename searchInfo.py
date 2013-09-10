@@ -1,3 +1,4 @@
+import urllib
 import urllib2
 from bs4 import BeautifulSoup
 from urlparse import urljoin
@@ -55,7 +56,6 @@ class crawler:
 		
 	def addtopackages(self, results, site, version):
 		vid = self.getentryid('os_version', 'majorversion', version)
-		print '----- vid = {0} -------'.format(vid)
 		res = self.con.execute(
 				"select id from site where sitename='%s' and majorversionid=%s" \
 						% (site, vid)).fetchone()[0]
@@ -82,7 +82,7 @@ class crawler:
 		for link in links:
 			if ('href' in dict(link.attrs)):
 				if 'rpm'  in link['href']:
-					results.append(link['href'])
+					results.append(urllib.unquote(link['href']))
 
 		self.addtopackages(results, site, version)
 
@@ -93,13 +93,17 @@ class searcher:
 	def __del__(self):
 		self.con.close()
 
-	def query(self, q):
+	def query(self, q, v, f):
+		if f == False:
+			q = '%'+q+'%'
+		else:
+			q = q+'%'
 		res = self.con.execute(
 				"select site.sitename, packages.package from packages, site \
 						where site.majorversionid=packages.majorversionid \
 						and packages.sitenameid=site.id and\
-						packages.package LIKE '%{0}%' and\
+						packages.package LIKE '{0}' and\
 						packages.majorversionid=(select id from os_version \
-						where majorversion='{1}')".format(q[0], q[1]))
+						where majorversion='{1}')".format(q, v))
 		for i in res.fetchall():
-			print i[0]+i[1]
+			yield i[0]+i[1]
