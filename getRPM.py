@@ -7,7 +7,14 @@ import re
 
 def doquery(query=None, version=None, flag=None, tofile=None):
 	s = searchInfo.searcher('rpm.db')
-	r = s.query(query, version, flag)
+	r = []
+	if isinstance(query, list):
+		qfuncs = [s.query(q, version, flag) for q in query]
+		for qfunc in qfuncs:
+			for obj in qfunc:
+				r.append(obj)
+	else:
+		r = s.query(query, version, flag)
 	if tofile == None:
 		for i in r:
 			print i
